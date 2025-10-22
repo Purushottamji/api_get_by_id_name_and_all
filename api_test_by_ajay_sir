@@ -1,0 +1,69 @@
+const express = require("express");
+const app = express();
+
+const db = require("./db");
+app.use(express.json());
+
+app.get("/students", (studentReq, studentRes) => {
+    const mysql = "SELECT * FROM students";
+    db.query(mysql, (error, result) => {
+        if (error) return studentRes.status(500).json({ "message": "server error" + error.message, "data": [] });
+        studentRes.status(200).json({ "message": "student data fetched", "data": result });
+    })
+})
+
+app.get("/students/:id", (studentReq, studentRes) => {
+    const mysql = "SELECT * FROM students WHERE id = ?"
+    const { id } = studentReq.params;
+    db.query(mysql, [id], (error, result) => {
+        if (error) return studentRes.status(500).json({ "message": "server error" + error.message, "data": [] });
+        if (result.length === 0) return studentRes.status(404).json({ "message": "student data not found", "data": [] });
+        studentRes.status(200).json({ "message": "student data fetched by id", "data": result });
+    })
+})
+
+app.post("/students", (studentReq, studentRes) => {
+    const { name, age, address } = studentReq.body;
+    const mysql = "INSERT INTO students(name, age, address) VALUES (?, ?, ?)";
+    db.query(mysql, [name, age, address], (error, result) => {
+        if (error) return studentRes.status(500).json({ "message": "server error", "data": {} });
+        studentRes.status(201).json({ "message": "student data posted", "data": { "id": result.insertId, "name": name, "age": age, "address": address } });
+    })
+})
+
+app.get("/students/search/:name", (studentReq, studentRes) => {
+    const sql = "SELECT * FROM students WHERE name = ?";
+    const { name } = studentReq.params;
+
+    db.query(sql, [name], (error, result) => {
+        if (error)  return studentRes.status(500).json({ message: "Server error", data: {} });
+        if (result.length === 0) return studentRes.status(404).json({ message: "Student data not found", data: {} });
+        studentRes.status(200).json({
+            message: "Student data fetched by name",
+            data: result,
+        });
+    });
+});
+
+app.get("/totalstudents",(studentReq,studentRes)=>{
+    const mysql="SELECT COUNT(id) FROM students";
+    db.query(mysql,(error,result)=>{
+        if(error) return studentRes.status(500).json({"message":"server error","data":{}});
+        studentRes.status(200).json({"message":"All student data number","data":result});
+    })
+})
+
+app.get("/top3/:age",(studentReq,studentRes)=>{
+    const {age}=studentReq.params;
+    const mysql="SELECT * FROM students WHERE age = ? LIMIT 3";
+    db.query(mysql,[age],(error,result)=>{
+        if(result.length===0) return studentRes.status(404).json({"message":"student data not found"});
+        if(error) return studentRes.status(500).json({"message":"server error","data":[]});
+         studentRes.status(200).json({"message":`student data under $age`,"data":result});
+    })
+})
+
+app.listen(5000, (error) => {
+    if (error) return console.log("server error :-" + error.message);
+    console.log("👍 server created");
+})
