@@ -64,6 +64,6 @@ app.get("/top3/:age",(studentReq,studentRes)=>{
 })
 
 app.listen(5000, (error) => {
-    if (error) return console.log("server error :-" + error.message);
+    if (error) return console.log("❌ server error :-" + error.message);
     console.log("👍 server created");
 })
