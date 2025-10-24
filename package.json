@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node api_test_by_ajay_sir"
+    "start": "node login_signup_api"
   },
   "keywords": [],
   "author": "",
